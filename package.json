@@ -1,5 +1,5 @@
 {
-  "name": "lwconnect-backend",
+  "name": "node-mqsql-crud-app",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

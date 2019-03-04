@@ -36,6 +36,16 @@ module.exports = {
             var PhpPasshash = passwordHash.hashPassword(req.body.number);
             var PhpPasshashBool = passwordHash.checkPassword(password, hash);
        return Wphash; 
+    },
+
+    currentdate: function (data) {    
+        var dateNow = new Date();
+        var dd = dateNow.getDate();
+        var monthSingleDigit = dateNow.getMonth() + 1,
+            mm = monthSingleDigit < 10 ? '0' + monthSingleDigit : monthSingleDigit;
+        var yy = dateNow.getFullYear().toString().substr(2);
+
+        return (mm + '/' + dd + '/' + yy);
     }
 
 }
