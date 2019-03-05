@@ -1,5 +1,5 @@
 
-var crypto = require("crypto");
+var crypto = require("crypto");  
 
 // not use
 var hasher = require('wordpress-hash-node'); 

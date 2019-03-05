@@ -4,14 +4,17 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const path = require('path');
 const app = express();
-
+var getIP = require('ipware')().get_ip; 
+var varyyyy;   
 const {getHomePage} = require('./routes/index'); 
 //const {addPlayerPage, addPlayer, deletePlayer, editPlayer, editPlayerPage} = require('./routes/player');
-const { getloginwp, getresetwp , testapp, mytaskwp } = require('./routes/securitydetail');    
-const port = 5000;
+const { getloginwp, getresetwp , testapp, mytaskwp, mytaskreplywp } = require('./routes/securitydetail');    
+const port = 5000;    
+var localStorage = require('localStorage')
+var requestIp = require('request-ip');  
 
 //http://10.0.0.67:5000/
- 
+ // chetan.singh userid == 147 
 // create connection to database 
 // the mysql.createConnection function takes in a configuration object which contains host, user, password and the database name.
 const db = mysql.createConnection ({
@@ -53,16 +56,30 @@ app.use((req,res,next) => {
     next();
 });
 
+app.use(function(req, res, next) {
+    var ipInfo = getIP(req);
+    varyyyy=ipInfo;
+    localStorage.setItem('ipInfo', JSON.stringify(ipInfo));    
+    // { clientIp: '127.0.0.1', clientIpRoutable: false }
+    next();
+});
+
+
+app.use(function(req, res, next) { 
+    var clientIp = requestIp.getClientIp(req); // on localhost > 127.0.0.1  
+    next();
+});  
+
 // routes for the app
 
 app.get('/', getHomePage); 
  
 //app.post('/add', getdataall);   
-
+ 
 app.post('/login', getloginwp);  
 app.post('/test', testapp);
 app.post('/mytask', mytaskwp);   
-
+app.post('/mytaskreply',mytaskreplywp)
 
 
 //app.get('/add', addPlayerPage);

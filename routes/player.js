@@ -9,7 +9,7 @@ module.exports = {
     },
 
 
-    addPlayer: (req, res) => {
+    addPlayer: (req, res) => { 
          
        // if (!req.files) {
            // return res.status(400).send("No files were uploaded.");
@@ -68,7 +68,7 @@ module.exports = {
             db.query(query, (err, result) => {
                 if (err) {
                    // return res.status(500).send(err);
-                    return res.status(500).json({
+                    return res.status(500).json({  
                         message: 'errr',
                         status :500
                     });
@@ -77,10 +77,9 @@ module.exports = {
                     message: "Successfully", 
                     status :200
                 });
-
-
-
-            });   
+            }); 
+            
+            
         }
             /*
             else {
