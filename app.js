@@ -4,16 +4,20 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const path = require('path');
 const app = express();
+
+const fs = require("fs");
+
 var getIP = require('ipware')().get_ip; 
 var varyyyy;   
 const {getHomePage} = require('./routes/index'); 
 //const {addPlayerPage, addPlayer, deletePlayer, editPlayer, editPlayerPage} = require('./routes/player');
-const { getloginwp, getresetwp , testapp, mytaskwp, mytaskreplywp } = require('./routes/securitydetail');    
-const port = 5000;    
+const { getloginwp, getresetwp , testapp } = require('./routes/securitydetail');   
+const { mytaskwp, mytaskreplywp, mytasklistwp, tasksrcwp, taskcatwp, taskimgwp } = require('./routes/task');       
+const port = 3555;       
 var localStorage = require('localStorage')
-var requestIp = require('request-ip');  
+var requestIp = require('request-ip');      
 
-//http://10.0.0.67:5000/
+//http://10.0.0.67:5000/  pm kill     pm2 delete all or pm2 stop all    pm2 start app.js    
  // chetan.singh userid == 147 
 // create connection to database 
 // the mysql.createConnection function takes in a configuration object which contains host, user, password and the database name.
@@ -36,8 +40,8 @@ global.db = db;
 
 // configure middleware
 app.set('port', process.env.port || port); // set express to use this port
-app.set('views', __dirname + '/views'); // set express to look in this folder to render our view
-app.set('view engine', 'ejs'); // configure template engine
+//app.set('views', __dirname + '/views'); // set express to look in this folder to render our view
+//app.set('view engine', 'ejs'); // configure template engine
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); // parse form data client  
 app.use(express.static(path.join(__dirname, 'public'))); // configure express to use public folder
@@ -72,14 +76,21 @@ app.use(function(req, res, next) {
 
 // routes for the app
 
-app.get('/', getHomePage); 
+//app.get('/', getHomePage); 
+app.post("/", express.static(path.join(__dirname, "./public"))); 
  
 //app.post('/add', getdataall);   
  
+
 app.post('/login', getloginwp);  
 app.post('/test', testapp);
 app.post('/mytask', mytaskwp);   
-app.post('/mytaskreply',mytaskreplywp)
+app.post('/mytaskreply',mytaskreplywp);
+app.post('/tasklist',mytasklistwp);  
+app.post('/tasksrc',tasksrcwp); 
+app.post('/taskcat',taskcatwp);  
+ 
+app.post('/imageUpload',taskimgwp); 
 
 
 //app.get('/add', addPlayerPage);
