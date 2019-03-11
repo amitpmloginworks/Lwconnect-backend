@@ -12,7 +12,7 @@ var varyyyy;
 const {getHomePage} = require('./routes/index'); 
 //const {addPlayerPage, addPlayer, deletePlayer, editPlayer, editPlayerPage} = require('./routes/player');
 const { getloginwp, getresetwp , testapp } = require('./routes/securitydetail');   
-const { mytaskwp, mytaskreplywp, mytasklistwp, tasksrcwp, taskcatwp, taskimgwp } = require('./routes/task');       
+const { mytaskwp, mytaskreplywp, mytasklistwp, tasksrcwp, taskcatwp, taskimgwp, taskcreatewp, taskfimgwp } = require('./routes/task');       
 const port = 3555;       
 var localStorage = require('localStorage')
 var requestIp = require('request-ip');      
@@ -82,15 +82,20 @@ app.post("/", express.static(path.join(__dirname, "./public")));
 //app.post('/add', getdataall);   
  
 
-app.post('/login', getloginwp);  
+app.post('/login', getloginwp); 
+   
 app.post('/test', testapp);
+
 app.post('/mytask', mytaskwp);   
 app.post('/mytaskreply',mytaskreplywp);
 app.post('/tasklist',mytasklistwp);  
 app.post('/tasksrc',tasksrcwp); 
 app.post('/taskcat',taskcatwp);  
- 
-app.post('/imageUpload',taskimgwp); 
+app.post('/taskcreate',taskcreatewp); 
+
+app.post('/taskcreateimg',taskfimgwp); 
+
+app.post('/imageUpload',taskimgwp);  
 
 
 //app.get('/add', addPlayerPage);

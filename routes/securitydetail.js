@@ -71,6 +71,7 @@ module.exports = {
 
 
 testapp:(req, res) =>   {
+  /*
 var now = new Date();
 console.log("now==",now) 
 // Basic usage
@@ -102,10 +103,61 @@ console.log("date7==",date7)
 var date8 = dateFormat(now, "h:MM tt");
 // Saturday, June 9th, 2007, 5:46:21 PM
 console.log("date8==",date8)
+*/
 
-return res.status(200).json({
-  message:'Successfully'
+
+let final_array = new Array();
+
+
+let agent_array = new Array();
+let usernameQuery = " SELECT * FROM `wp_termmeta` where term_id='28'"; 
+db.query(usernameQuery, (err1, result1) => {        
+    if (err1) {
+       return res.status(500).json({ message: 'errr5', status :500, msg:err1,wpstatus:0 });
+    }
+     
+    if (result1.length > 0) { 
+
+      var metaarr = result1[0].meta_value; 
+      var metasplit = metaarr.split("\";");   
+      final_array=result1;
+      let metalen = metasplit.length-1;
+      for(let i=0;i<metalen;i++){   
+          let metasplit0 = metasplit[i].split('\:"'); 
+          agent_array.push(metasplit0[1]);
+      }
+      
+    // for (var j = 0; j < result1.length; j++){
+      //  let usernameQuery1 = "SELECT * FROM `wp_terms` WHERE `term_id` = '" + result1[j].term_id + "'";
+      //  db.query(usernameQuery1, (err, result) => {        
+      //      if (err) {
+      //         return res.status(500).json({ message: 'errr5', status :500, msg:err,wpstatus:0 });
+      //      }  
+      //       for (var i = 0; i < result.length; i++){
+      //       second_array.push({ term_id:result[i].term_id,name:result[i].name,slug:result[i].slug });  
+      //       }          
+      //      final_array.push({ message:"Fetch records", second_array:second_array }); 
+      //       if(final_array.length ==j){          
+      //         return res.status(200).json({ status :200, final_array:second_array,wpstatus:1 });
+      //       }            
+      //  }); 
+    //  }  
+    return res.status(200).json({ message:'Successfully',agent_arr: result1[0].meta_value,agent_array:agent_array  }); 
+
+    } 
+    else { 
+        return res.status(200).json({  message: 'No record found', status :200,wpstatus:1  }); 
+}
 });
+
+
+
+  
+
+
+
+
+
 },
 
 };
