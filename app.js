@@ -84,7 +84,7 @@ app.post("/", express.static(path.join(__dirname, "./public")));
 
 app.post('/login', getloginwp); 
    
-app.post('/test', testapp);
+app.post('/test', testapp); 
 
 app.post('/mytask', mytaskwp);   
 app.post('/mytaskreply',mytaskreplywp);
@@ -106,4 +106,5 @@ app.post('/imageUpload',taskimgwp);
 // set the app to listen on the port
 app.listen(port, () => {   
     console.log(`Server running on port: http://localhost:${port}`);  
+    console.log(`Server running on port: http://182.156.204.228:${port}`);   
 });

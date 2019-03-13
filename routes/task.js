@@ -4,6 +4,9 @@ const nodemailer = require('nodemailer');
 var dateFormat = require('dateformat');
 var localStorage = require('localStorage')
 
+const uniqueRandom = require('unique-random');
+const randunique = uniqueRandom(10000000000, 99999999999);
+
 module.exports = {  
  
 mytaskwp:(req, res) =>   { 
@@ -115,7 +118,8 @@ mytaskreplywp:(req, res) =>   {
                 if (err3) {
                     return res.status(500).json({ message: 'errr', status :500, wpstatus:0 });
                 }
-                return res.status(200).json({  message: "Your message has been successfully sent.", status :200, wpstatus:1,currenttime:dateFormat(datecurrent, "h:MM TT"),currentdate:datecurrent  });   
+                commentID=result1.insertId; 
+                return res.status(200).json({  message: "Your message has been successfully sent.", status :200, wpstatus:1,currenttime:dateFormat(datecurrent, "h:MM TT"),currentdate:datecurrent,commentID:commentID  });    
             }); 
             }); 
                }
@@ -155,47 +159,47 @@ mytasklistwp:(req, res) =>   {
             Usrauther=result[0].user_nicename;
             Usremail=result[0].user_email;
             Usrurl=result[0].user_url;
-
-             let usernameQuery1 = " SELECT * FROM `wp_posts`  WHERE `post_author` = '" + userid + "'";   
+ 
+             let usernameQuery1 = " SELECT * FROM `wp_posts`  WHERE `post_author` = '" + userid + "' and post_type ='fast_ticket'";   
              db.query(usernameQuery1, (err1, result1) => {        
                  if (err1) {
                     return res.status(500).json({ message: 'errr5', status :500, msg:err1, wpstatus:0 });
                  }
                  if (result1.length > 0) {
-                    
+                  let incrementval=0;  
                 for(var i=0;i<result1.length; i++){
  
                 PostID=result1[i].ID;
+                
                 PostDate=dateFormat(result1[i].post_date, "dddd, mmmm dS, yyyy, h:MM:ss TT");
+            
                 PostTitle=result1[i].post_title;
 
-                let usernameQuery2 = "SELECT * FROM `wp_term_relationships` WHERE `object_id`='" + PostID + "'";    
+                final_array.push({ TermName:"", PostTitle:PostTitle,PostDate:PostDate,PostID:PostID,Usrauther:Usrauther,image:"" });  
+                let usernameQuery2 = "SELECT * FROM `wp_term_relationships` WHERE `object_id`='"+result1[i].ID+"'";     
                   db.query(usernameQuery2, (err2, result2) => {
                   if (err2) {
                       return res.status(500).json({ message: 'errr', status :500, wpstatus:0 });
                   }
 
                 TermID = result2[1].term_taxonomy_id;  
-
                 let usernameQuery3 = "SELECT * FROM `wp_terms` where term_id='" +TermID + "'";   
                 db.query(usernameQuery3, (err3, result3) => {
                 if (err3) {
                       return res.status(500).json({ message: 'errr', status :500, wpstatus:0 });
                 } 
                 TermName=result3[0].name;
-                final_array.push({ TermName:TermName, PostTitle:PostTitle,PostDate:PostDate,PostID:PostID,Usrauther:Usrauther,image:"" }); 
-                if(final_array.length ==result1.length){  
+                var finalindex="";
+               final_array.forEach((number, index) =>  { if(number.PostID == result2[1].object_id)  { finalindex=index; return index; } }); 
+                final_array[finalindex].TermName=TermName;    
+                // final_array.push({ TermName:TermName, PostTitle:result1[i].post_title,PostDate:dateFormat(result1[i].post_date, "dddd, mmmm dS, yyyy, h:MM:ss TT"),PostID:result1[i].ID,Usrauther:result[0].user_nicename,image:"" }); 
+                incrementval++
+                if(final_array.length ===incrementval){   
                   return res.status(200).json({  message: "Data recevied successfully.", status :200, wpstatus:1,final_array:final_array });    
                 }
-                
-                }); 
+                });  
               }); 
-         
-              
             }  // end of for loop here ... 
- 
-        
-
             }
         }); 
         } 
@@ -203,8 +207,6 @@ mytasklistwp:(req, res) =>   {
         return res.status(200).json({  message: 'you are not authorized to use', status :200 , wpstatus:0 });  
       }
     });
-
-
     },
 
 
@@ -327,7 +329,7 @@ mytasklistwp:(req, res) =>   {
         let uploadedFile = req.files.file;
         let fileName = uploadedFile.name;
         let fileExtension = uploadedFile.mimetype.split('/')[1];   
-
+console.log("file ==",imageUrl)
        // if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/jpeg' || uploadedFile.mimetype === 'image/gif') {
 
         uploadedFile.mv(`public/assets/img/${fileName}`, (err ) => {
@@ -336,6 +338,8 @@ mytasklistwp:(req, res) =>   {
           } 
           return res.status(200).json({  email:email, userid:userid, fileName:fileName, image:fileName });  
       });
+
+
     },
 
 
@@ -349,6 +353,8 @@ let userid=req.body.userid;
 let postcontent=req.body.postcontent;
 let posttitle=req.body.posttitle;
 let postcat=req.body.postcat;
+
+let commentID;
 
 let Usrauther;
 let Usremail;
@@ -367,7 +373,6 @@ let datecurrent
         Usremail=result[0].user_email;
         Usrurl=result[0].user_url;
 
- 
     let usernameQuerycat = "SELECT * FROM `wp_termmeta` where term_id='"+postcat+"'"; 
     db.query(usernameQuerycat, (err1, result1) => {        
         if (err1) {
@@ -400,18 +405,17 @@ let datecurrent
               wppostID=result1.insertId; 
              
               let usernameQuery101="INSERT INTO `wp_term_relationships` (`object_id`, `term_taxonomy_id`, `term_order`) VALUES('" + wppostID + "','22','0');";
-              console.log("usernameQuery101=",usernameQuery101);   
-              db.query(usernameQuery101, (err4, result4) => {  console.log("successfully 4"); }); 
+                
+              db.query(usernameQuery101, (err4, result4) => {  console.log("success before loop"); }); 
 
     for(let j = 0;j<agent_array.length;j++){
     let usernameQuery102 ="INSERT INTO `wp_term_relationships` (`object_id`, `term_taxonomy_id`, `term_order`) VALUES('" + wppostID + "','" + agent_array[j] + "','0')";
-    db.query(usernameQuery102, (err4, result4) => {  console.log("successfully 4"); }); 
+    db.query(usernameQuery102, (err4, result4) => {  console.log("success in loop "+j); }); 
     }
   
-  let usernameQuery103 ="INSERT INTO `wp_term_relationships` (`object_id`, `term_taxonomy_id`, `term_order`) VALUES('" + wppostID + "','" + postcat + "','0')";     
+  let usernameQuery103 ="INSERT INTO `wp_term_relationships` (`object_id`, `term_taxonomy_id`, `term_order`) VALUES('" + wppostID + "','" + postcat + "','0')";       
 
-  console.log("usernameQuery103=",usernameQuery103);
-              db.query(usernameQuery103, (err4, result4) => {  console.log("successfully 4"); }); 
+              db.query(usernameQuery103, (err4, result4) => {  console.log("success after loop"); }); 
 
 
               let usernameQuery2 = "UPDATE `wp_posts` SET `guid`='https://loginworks.net/portal/my-account/ticket/" + wppostID + "' WHERE ID='" +wppostID + "'";  
@@ -427,7 +431,8 @@ let datecurrent
               if (err3) {
                   return res.status(500).json({ message: 'errr5', status :500, wpstatus:0 });
               }
-              return res.status(200).json({  message: "Your task has been saved successfully.", status :200, wpstatus:1  });    
+              commentID=result1.insertId; 
+              return res.status(200).json({  message: "Your task has been saved successfully.", status :200, wpstatus:1 , commentID:commentID }); 
           }); 
           });     
          });      
@@ -437,40 +442,42 @@ let datecurrent
   }
 });
 
+},
 
 
 
 
-
-    },
-
-    taskfimgwp:(req, res) =>  {  
+    taskfimgwp:(req, res) =>  { 
       let userid = req.body.userid;
-      let imageUrl = req.body.file;
+  let uploadedFile = req.files.file;
+  let fileName = uploadedFile.name;   
+  let commentID= req.body.commentID
+  let fileExtension = uploadedFile.mimetype.split('/')[1]; 
+ 
+  //let fileName = randunique()+"."+fileExtension;
+  console.log("fff===",uploadedFile) 
+  console.log("fileExtension==",fileExtension) 
+ // if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/jpeg' || uploadedFile.mimetype === 'image/gif') {
+  uploadedFile.mv(`public/assets/img/${fileName}`, (err ) => {
+    if (err) {  return res.status(500).json({ message: 'errr5',status :500,msg:err,wpstatus:0 });  }
 
-        let uploadedFile = req.files.file;
-        let fileName = uploadedFile.name;
-        let fileExtension = uploadedFile.mimetype.split('/')[1];   
-       // if (uploadedFile.mimetype === 'image/png' || uploadedFile.mimetype === 'image/jpeg' || uploadedFile.mimetype === 'image/gif') {
-        uploadedFile.mv(`public/assets/img/${fileName}`, (err ) => {
-          if (err) {
-              return res.status(500).send(err); 
-          } 
-
-          var now = new Date();
-          datecurrent = dateFormat(now, "yyyy-mm-dd HH:MM:ss"); 
-  
-           let usernameQuery1 = "INSERT INTO `wp_posts` (`post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`,`post_status`, `comment_status`, `ping_status`,`post_password`, `post_name`, `to_ping`,`pinged`, `post_modified`, `post_modified_gmt`,`post_content_filtered`, `post_parent`, `guid`,`menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES('" + userid + "','" + datecurrent + "','" + datecurrent + "','','" + fileName + "','','inherit','open','closed','','" + fileName + "','','','" + datecurrent + "','" + datecurrent + "','','0','http://182.156.204.228:3555/assets/img/"+fileName+"','0','attachment','image/jpg','0' )";    
-
-           db.query(usernameQuery1, (err1, result1) => {        
-               if (err1) {
-                  return res.status(500).json({ message: 'errr5', status :500, msg:err1, wpstatus:0 });
-               }
-              return res.status(200).json({ userid:userid, fileName:fileName, image:fileName }); 
-        });  
-       //return res.status(200).json({  userid:userid, fileName:fileName, image:fileName });    
+    var now = new Date();
+    datecurrent = dateFormat(now, "yyyy-mm-dd HH:MM:ss"); 
+                  let usernameQuery1 = "INSERT INTO `wp_posts` (`post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`,`post_status`, `comment_status`, `ping_status`,`post_password`, `post_name`, `to_ping`,`pinged`, `post_modified`, `post_modified_gmt`,`post_content_filtered`, `post_parent`, `guid`,`menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES('" + userid + "','" + datecurrent + "','" + datecurrent + "','','" + fileName + "','','inherit','open','closed','','" + fileName + "','','','" + datecurrent + "','" + datecurrent + "','','0','http://182.156.204.228:3555/assets/img/"+fileName+"','0','attachment','image/jpg','0' )"; 
+      db.query(usernameQuery1, (err1, result1) => {        
+      if (err1) { return res.status(500).json({ message: 'errr5', status :500, msg:err1, wpstatus:0 });  }
+         let usernameQuery201 = "INSERT INTO `wp_commentmeta` (`comment_id`, `meta_key`, `meta_value`) VALUES('" + commentID + "','_attachments','http://182.156.204.228:3555/assets/img/"+fileName+"')"; 
+         db.query(usernameQuery201, (err201, result201) => {        
+             if (err201){ return res.status(500).json({ message: 'errr5',status :500,msg:err1,wpstatus:0 }); }
       });
-    },
+        return res.status(200).json({ userid:userid, fileName:fileName, image:fileName }); 
+  });
+  
+  //return res.status(200).json({ userid:userid, fileName:fileName, image:fileName }); 
+  
+});
+
+},
 
 
 };
