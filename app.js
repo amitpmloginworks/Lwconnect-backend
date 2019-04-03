@@ -8,13 +8,20 @@ const app = express();
 const fs = require("fs");
 
 var getIP = require('ipware')().get_ip; 
-var varyyyy;   
-const {getHomePage} = require('./routes/index'); 
+var varyyyy;     
+//const {getHomePage} = require('./routes/index'); 
 //const {addPlayerPage, addPlayer, deletePlayer, editPlayer, editPlayerPage} = require('./routes/player');
 const { getloginwp, getresetwp , testapp } = require('./routes/securitydetail');   
-const { mytaskwp, mytaskreplywp, mytasklistwp, tasksrcwp, taskcatwp, taskimgwp, taskcreatewp, taskfimgwp } = require('./routes/task');       
+const { taskcatwp } = require('./routes/task'); 
+const { mytaskwp, mytaskreplywp, mytasklistwp, tasksrcwp, taskimgwp , taskoncomwp } = require('./routes/task');
+const { taskcreatewp, taskfimgwp, taskactivewp } = require('./routes/task');   
+const { taskrightside } = require('./routes/task');   
+const { taskfeedback, TaskApproveDis } = require('./routes/task'); 
+
+const { dashboardwp, notificationwp } = require('./routes/other');  
+
 const port = 3555;       
-var localStorage = require('localStorage')
+var localStorage = require('localStorage')  
 var requestIp = require('request-ip');      
 
 //http://10.0.0.67:5000/  pm kill     pm2 delete all or pm2 stop all    pm2 start app.js    
@@ -48,6 +55,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // configure express to
 app.use(fileUpload()); // configure fileupload
              
 app.use((req,res,next) => {
+   
     res.header('Access-Control-Allow-Origin','*');
     res.header(
         'Access-Control-Allow-Headers',
@@ -86,16 +94,40 @@ app.post('/login', getloginwp);
    
 app.post('/test', testapp); 
 
-app.post('/mytask', mytaskwp);   
+app.post('/forgetpass', getresetwp);   
+
+ 
+//const userRoutes = require('./user'); 
+//Routes which handle requests
+//app.use('/user',userRoutes);  
+ 
+app.post('/mytask', mytaskwp);
+
+
 app.post('/mytaskreply',mytaskreplywp);
 app.post('/tasklist',mytasklistwp);  
 app.post('/tasksrc',tasksrcwp); 
 app.post('/taskcat',taskcatwp);  
 app.post('/taskcreate',taskcreatewp); 
+app.post('/dashboard',dashboardwp);     
 
 app.post('/taskcreateimg',taskfimgwp); 
 
 app.post('/imageUpload',taskimgwp);  
+
+app.post('/taskactive',taskactivewp);  
+
+app.post('/taskoncomp',taskoncomwp);   
+
+app.post('/taskrightside',taskrightside); 
+
+app.post('/taskapprove',TaskApproveDis); 
+
+app.post('/taskfeedback',taskfeedback);
+    
+app.post('/notification',notificationwp);   
+
+
 
 
 //app.get('/add', addPlayerPage);

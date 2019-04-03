@@ -43,7 +43,6 @@ module.exports = {
        // var hashedPassword = crypto.createHash('md5').update(data).digest('hex');
        // var hashedPassword = sha1("b@123"); 
         //return hashedPassword; 
-
         var reverseMd5 = ReverseMd5({
             lettersUpper: false,
             lettersLower: true,
@@ -54,7 +53,6 @@ module.exports = {
         });
         let revstring =reverseMd5('762f44c342a9580748ef0cfaa527adf5'); 
         return reverseMd5('762f44c342a9580748ef0cfaa527adf5');
-
     },
  
 
@@ -64,6 +62,14 @@ module.exports = {
             var PhpPasshash = passwordHash.hashPassword(req.body.number);
             var PhpPasshashBool = passwordHash.checkPassword(password, hash);
        return Wphash; 
+    },
+
+    wprandomtxt: function (length) {
+        var text = "";
+        var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+        for (var i = 0; i < length; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text; 
     },
 
     currentdate: function (data) {    
